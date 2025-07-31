@@ -56,6 +56,7 @@ type orderResource struct {
 }
 
 // Metadata returns the resource type name.
+// resource 跟 provider 通过 metadata 挂钩，resource 的 type name 前缀是 provider 的 type name
 func (r *orderResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_order"
 }
@@ -275,6 +276,9 @@ func (r *orderResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 }
 
+// Delete 方法并没有把资源的状态更新到 terraform 状态文件中
+// 一个原因是 delete 一般不会返回资源的当前状态，删了就删了
+// 第二个原因是 Terraform 可以通过 read 方法及时地去查询的资源的最新状态
 func (r *orderResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// Retrieve values from state
 	var state orderResourceModel
@@ -296,6 +300,8 @@ func (r *orderResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 }
 
 // Configure adds the provider configured client to the resource.
+// 获取 provider 中包含的 client，这个 client 一定是 hashicups.Client，跟基础设施挂钩
+// 但是这个 provider 不一定必须是 hashicups，也可以是其他 provider，只要他也使用了 hashicups.Client，调用了 resp.ResourceData = client
 func (r *orderResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Add a nil check when handling ProviderData because Terraform
 	// sets that data after it calls the ConfigureProvider RPC.
@@ -317,7 +323,9 @@ func (r *orderResource) Configure(_ context.Context, req resource.ConfigureReque
 	r.client = client
 }
 
+// ImportState 支持 import 语句，
 func (r *orderResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	// Retrieve import ID and save to id attribute
+	// 表示资源中的 id
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

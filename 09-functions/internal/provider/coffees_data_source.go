@@ -48,6 +48,7 @@ type coffeesIngredientsModel struct {
 }
 
 // Metadata returns the data source type name.
+// data source 跟 provider 通过 metadata 挂钩，data source 的 type name 前缀是 provider 的 type name
 func (d *coffeesDataSource) Metadata(_ context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_coffees"
 }
@@ -137,6 +138,8 @@ func (d *coffeesDataSource) Read(ctx context.Context, req datasource.ReadRequest
 }
 
 // Configure adds the provider configured client to the data source.
+// 获取 provider 中包含的 client，这个 client 一定是 hashicups.Client，跟基础设施挂钩
+// 但是这个 provider 不一定必须是 hashicups，也可以是其他 provider，只要他也使用了 hashicups.Client，调用了 resp.DataSourceData = client
 func (d *coffeesDataSource) Configure(_ context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Add a nil check when handling ProviderData because Terraform
 	// sets that data after it calls the ConfigureProvider RPC.

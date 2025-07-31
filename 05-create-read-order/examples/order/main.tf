@@ -10,7 +10,7 @@ terraform {
 provider "hashicups" {
   username = "education"
   password = "test123"
-  host     = "http://localhost:19090"
+  host     = "http://172.18.21.239:19090"
 }
 
 resource "hashicups_order" "edu" {

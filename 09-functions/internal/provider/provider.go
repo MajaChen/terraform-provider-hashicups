@@ -31,6 +31,7 @@ func New(version string) func() provider.Provider {
 }
 
 // hashicupsProviderModel maps provider schema data to a Go type.
+// provider 数据模型，接受 host\username\password 三个参数
 type hashicupsProviderModel struct {
 	Host     types.String `tfsdk:"host"`
 	Username types.String `tfsdk:"username"`
@@ -46,12 +47,15 @@ type hashicupsProvider struct {
 }
 
 // Metadata returns the provider type name.
+// 关于 provider 的元数据
 func (p *hashicupsProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+	// 核心是 type name
 	resp.TypeName = "hashicups"
 	resp.Version = p.version
 }
 
 // Schema defines the provider-level schema for configuration data.
+// 关于 provider 的模型数据
 func (p *hashicupsProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
@@ -69,6 +73,14 @@ func (p *hashicupsProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
 	}
 }
 
+// Configure 方法会初始化 provider，创建 client，并将 client 暴露给 resource 和 data source
+/*
+三步走：
+ 1.接受参数
+ 2.基于入参创建 client
+ 3.暴露 client
+
+*/
 func (p *hashicupsProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	tflog.Info(ctx, "Configuring HashiCups client")
 
@@ -198,6 +210,7 @@ func (p *hashicupsProvider) Configure(ctx context.Context, req provider.Configur
 }
 
 // DataSources defines the data sources implemented in the provider.
+// data source 跟 provider 挂钩
 func (p *hashicupsProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewCoffeesDataSource,
@@ -205,6 +218,7 @@ func (p *hashicupsProvider) DataSources(_ context.Context) []func() datasource.D
 }
 
 // Resources defines the resources implemented in the provider.
+// 毋庸置疑，resource 跟 provider 挂钩
 func (p *hashicupsProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewOrderResource,
